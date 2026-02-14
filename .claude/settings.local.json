@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)"
+    ]
+  }
+}
