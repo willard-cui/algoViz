@@ -23,7 +23,7 @@ SearchResult IterativeDeepeningAStar::search(const SearchProblem& problem) {
         path.clear();
         path.push_back(root);
         
-        SearchBound searchResult = depthLimitedSearch(root, problem, bound, path);
+        SearchBound searchResult = depthLimitedSearch(root, problem, bound, path, result.visitedStates);
         
         // Update statistics (approximate)
         // Since we don't count nodes in recursive calls easily without passing ref, 
@@ -37,7 +37,7 @@ SearchResult IterativeDeepeningAStar::search(const SearchProblem& problem) {
         }
         
         if (searchResult.nextLimit == std::numeric_limits<double>::infinity()) {
-            return SearchResult();
+            return SearchResult(); // Return failure
         }
         
         bound = searchResult.nextLimit;
@@ -45,10 +45,13 @@ SearchResult IterativeDeepeningAStar::search(const SearchProblem& problem) {
 }
 
 IterativeDeepeningAStar::SearchBound IterativeDeepeningAStar::depthLimitedSearch(
-    std::shared_ptr<SearchNode> node,
+    const std::shared_ptr<SearchNode>& node,
     const SearchProblem& problem,
     double fLimit,
-    std::vector<std::shared_ptr<SearchNode>>& path) {
+    std::vector<std::shared_ptr<SearchNode>>& path,
+    std::vector<std::shared_ptr<State>>& visited) {
+    
+    visited.push_back(node->state);
     
     double f = node->pathCost + problem.heuristic(*node->state);
     
@@ -85,7 +88,7 @@ IterativeDeepeningAStar::SearchBound IterativeDeepeningAStar::depthLimitedSearch
         auto child = std::make_shared<SearchNode>(nextState, node, action, newCost, node->depth + 1);
         
         path.push_back(child);
-        SearchBound res = depthLimitedSearch(child, problem, fLimit, path);
+        SearchBound res = depthLimitedSearch(child, problem, fLimit, path, visited);
         path.pop_back();
         
         if (res.found) {

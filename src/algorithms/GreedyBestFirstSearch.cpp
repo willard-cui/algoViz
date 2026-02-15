@@ -7,7 +7,7 @@ namespace searching {
 
 SearchResult GreedyBestFirstSearch::search(const SearchProblem& problem) {
     SearchResult result;
-    std::unordered_map<std::shared_ptr<State>, double> reached; // state -> best h-value so far
+    std::unordered_map<std::shared_ptr<State>, double, StatePtrHash, StatePtrEqual> reached; // state -> best h-value so far
 
     NodeComparator comparator(&problem);
     std::priority_queue<std::shared_ptr<SearchNode>,

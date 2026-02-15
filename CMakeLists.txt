@@ -40,6 +40,18 @@ qt_add_executable(AlgorithmVisualizationPlatform
     src/gui/main.cpp
     src/models/SidebarModel.h
     src/models/SidebarModel.cpp
+    src/models/VisualizationModel.h
+    src/models/VisualizationModel.cpp
+    src/algorithms/SearchAlgorithm.cpp
+    src/algorithms/BreadthFirstSearch.cpp
+    src/algorithms/DepthFirstSearch.cpp
+    src/algorithms/DepthLimitedSearch.cpp
+    src/algorithms/IterativeDeepeningDFS.cpp
+    src/algorithms/UniformCostSearch.cpp
+    src/algorithms/GreedyBestFirstSearch.cpp
+    src/algorithms/AStarSearch.cpp
+    src/algorithms/WeightedAStarSearch.cpp
+    src/algorithms/IterativeDeepeningAStar.cpp
     resources/qml/qml.qrc
 )
 

@@ -1,9 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Shapes
 
 Rectangle {
     color: "#ecf0f1"
+    property var visualizationModel
 
     ColumnLayout {
         anchors.fill: parent
@@ -17,7 +19,9 @@ Rectangle {
 
             Label {
                 anchors.centerIn: parent
-                text: "Algorithm Visualization Area"
+                text: visualizationModel && visualizationModel.currentAlgorithm && visualizationModel.currentAlgorithm !== "" 
+                      ? "Visualizing: " + visualizationModel.currentAlgorithm 
+                      : "Visualization Area"
                 color: "white"
                 font.bold: true
                 font.pixelSize: 14
@@ -26,130 +30,131 @@ Rectangle {
 
         // Main visualization canvas
         Rectangle {
+            id: canvasArea
             Layout.fillWidth: true
             Layout.fillHeight: true
             color: "white"
             border.color: "#bdc3c7"
             border.width: 1
+            clip: true
 
-            Column {
+            // Map Container
+            Item {
+                id: mapContainer
+                width: 600
+                height: 400
                 anchors.centerIn: parent
-                spacing: 20
-                width: parent.width * 0.8
+                scale: Math.min(parent.width / 650, parent.height / 450)
+                
+                // Coordinate transformation: 
+                // Map range: X[-40, 170], Y[-20, 120] -> width ~210, height ~140
+                // We want to map this to our container 600x400
+                // Center of map: (65, 50)
+                // Center of container: (300, 200)
+                // Scale factor: 2.5
+                
+                property real mapScale: 2.5
+                property real centerX: 300
+                property real centerY: 200
+                property real mapCenterX: 65
+                property real mapCenterY: 50
+                
+                function toScreenX(x) { return centerX + (x - mapCenterX) * mapScale }
+                function toScreenY(y) { return centerY + (y - mapCenterY) * mapScale }
 
-                // Visualization placeholder
-                Rectangle {
-                    width: 400
-                    height: 300
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    color: "#f8f9fa"
-                    border.color: "#3498db"
-                    border.width: 2
-                    radius: 5
-
-                    Label {
-                        anchors.centerIn: parent
-                        text: "Visualization Canvas"
-                        font.bold: true
-                        font.pixelSize: 18
-                        color: "#2c3e50"
-                    }
-
-                    Label {
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.topMargin: 20
-                        text: "Algorithm steps will be visualized here"
-                        font.pixelSize: 12
-                        color: "#7f8c8d"
-                    }
-                }
-
-                // Status indicators
-                Row {
-                    spacing: 20
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    Rectangle {
-                        width: 100
-                        height: 60
-                        color: "#2ecc71"
-                        radius: 5
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 5
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Ready"
-                                color: "white"
-                                font.bold: true
-                            }
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Status"
-                                font.pixelSize: 10
-                                color: "white"
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        width: 100
-                        height: 60
-                        color: "#e74c3c"
-                        radius: 5
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 5
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "0"
-                                color: "white"
-                                font.bold: true
-                                font.pixelSize: 18
-                            }
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Steps"
-                                font.pixelSize: 10
-                                color: "white"
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        width: 100
-                        height: 60
-                        color: "#f39c12"
-                        radius: 5
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 5
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "5"
-                                color: "white"
-                                font.bold: true
-                                font.pixelSize: 18
-                            }
-
-                            Label {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Speed"
-                                font.pixelSize: 10
-                                color: "white"
+                // Roads
+                Repeater {
+                    model: visualizationModel ? visualizationModel.roads : []
+                    Shape {
+                        ShapePath {
+                            strokeWidth: 2
+                            strokeColor: "#bdc3c7"
+                            startX: mapContainer.toScreenX(modelData.fromX !== undefined ? modelData.fromX : canvasArea.getCityX(modelData.from))
+                            startY: mapContainer.toScreenY(modelData.fromY !== undefined ? modelData.fromY : canvasArea.getCityY(modelData.from))
+                            PathLine {
+                                x: mapContainer.toScreenX(modelData.toX !== undefined ? modelData.toX : canvasArea.getCityX(modelData.to))
+                                y: mapContainer.toScreenY(modelData.toY !== undefined ? modelData.toY : canvasArea.getCityY(modelData.to))
                             }
                         }
                     }
                 }
+
+                // Cities
+                Repeater {
+                    model: visualizationModel ? visualizationModel.cities : []
+                    Rectangle {
+                        width: 20
+                        height: 20
+                        radius: 10
+                        x: mapContainer.toScreenX(modelData.x) - width/2
+                        y: mapContainer.toScreenY(modelData.y) - height/2
+                        
+                        color: {
+                            if (!visualizationModel) return "#34495e";
+                            
+                            // Check if in path (solution)
+                            var inPath = false;
+                            for(var i=0; i<visualizationModel.pathNodes.length; i++) {
+                                if(visualizationModel.pathNodes[i] === modelData.name) {
+                                    inPath = true;
+                                    break;
+                                }
+                            }
+                            if (inPath) return "#e74c3c"; // Red for path
+                            
+                            // Check if current node
+                            if (visualizationModel.currentNode === modelData.name) return "#f1c40f"; // Yellow for current
+                            
+                            // Check if visited
+                            var visited = false;
+                            for(var i=0; i<visualizationModel.visitedNodes.length; i++) {
+                                if(visualizationModel.visitedNodes[i] === modelData.name) {
+                                    visited = true;
+                                    break;
+                                }
+                            }
+                            if (visited) return "#2ecc71"; // Green for visited
+                            
+                            // Check if start or goal
+                            if (modelData.name === visualizationModel.startNode || modelData.name === visualizationModel.goalNode) {
+                                return "#e74c3c"; // Red for Start/Goal
+                            }
+                            
+                            return "#34495e"; // Default
+                        }
+                        
+                        border.color: "white"
+                        border.width: 2
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: -15
+                            text: modelData.name
+                            font.pixelSize: 12
+                            style: Text.Outline
+                            styleColor: "white"
+                        }
+                    }
+                }
+            }
+            
+            // Helper function to get city coordinates by name (naive implementation, O(N))
+            function getCityX(name) {
+                if (!visualizationModel) return 0;
+                var cities = visualizationModel.cities;
+                for(var i=0; i<cities.length; i++) {
+                    if (cities[i].name === name) return cities[i].x;
+                }
+                return 0;
+            }
+            
+            function getCityY(name) {
+                if (!visualizationModel) return 0;
+                var cities = visualizationModel.cities;
+                for(var i=0; i<cities.length; i++) {
+                    if (cities[i].name === name) return cities[i].y;
+                }
+                return 0;
             }
         }
 
@@ -164,17 +169,24 @@ Rectangle {
                 anchors.margins: 5
 
                 Label {
-                    text: "Platform Framework Active"
+                    text: visualizationModel ? "Nodes Visited: " + visualizationModel.visitedNodes.length : "Not ready"
                     color: "white"
                     font.pixelSize: 11
                 }
 
-                Item {
-                    Layout.fillWidth: true
+                Item { Layout.fillWidth: true }
+                
+                Label {
+                    text: visualizationModel && visualizationModel.pathNodes.length > 0 ? "Path Found! Length: " + visualizationModel.pathNodes.length : ""
+                    color: "#2ecc71"
+                    font.pixelSize: 11
+                    font.bold: true
                 }
 
+                Item { Layout.fillWidth: true }
+
                 Label {
-                    text: "No algorithm loaded"
+                    text: visualizationModel ? (visualizationModel.isRunning ? "Running..." : "Ready") : "Initializing..."
                     color: "#bdc3c7"
                     font.pixelSize: 11
                 }

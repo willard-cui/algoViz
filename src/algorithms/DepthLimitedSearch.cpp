@@ -10,11 +10,12 @@ SearchResult DepthLimitedSearch::search(const SearchProblem& problem) {
     return result;
 }
 
-SearchResult DepthLimitedSearch::recursiveDLS(std::shared_ptr<SearchNode> node,
+SearchResult DepthLimitedSearch::recursiveDLS(const std::shared_ptr<SearchNode>& node,
                                              const SearchProblem& problem,
                                              int depth) {
     SearchResult result;
     result.nodesExpanded = 1; // This node is being expanded
+    result.visitedStates.push_back(node->state);
 
     // Check if goal
     if (problem.isGoal(*node->state)) {
@@ -47,6 +48,11 @@ SearchResult DepthLimitedSearch::recursiveDLS(std::shared_ptr<SearchNode> node,
 
         SearchResult childResult = recursiveDLS(childNode, problem, depth - 1);
         result.nodesExpanded += childResult.nodesExpanded;
+        
+        // Accumulate visited states regardless of success
+        result.visitedStates.insert(result.visitedStates.end(),
+                                   childResult.visitedStates.begin(),
+                                   childResult.visitedStates.end());
 
         if (childResult.success) {
             // Propagate success up
@@ -54,9 +60,6 @@ SearchResult DepthLimitedSearch::recursiveDLS(std::shared_ptr<SearchNode> node,
             result.solution = childResult.solution;
             result.totalCost = childResult.totalCost;
             result.maxFrontierSize = std::max(result.maxFrontierSize, childResult.maxFrontierSize);
-            result.visitedStates.insert(result.visitedStates.end(),
-                                       childResult.visitedStates.begin(),
-                                       childResult.visitedStates.end());
             return result;
         } else if (!childResult.success && childResult.maxFrontierSize > 0) {
             // Cutoff occurred

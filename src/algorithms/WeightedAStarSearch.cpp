@@ -7,7 +7,7 @@ namespace searching {
 
 SearchResult WeightedAStarSearch::search(const SearchProblem& problem) {
     SearchResult result;
-    std::unordered_map<std::shared_ptr<State>, double> reached; // state -> best weighted f-cost
+    std::unordered_map<std::shared_ptr<State>, double, StatePtrHash, StatePtrEqual> reached; // state -> best weighted f-cost
 
     NodeComparator comparator(&problem, weight);
     std::priority_queue<std::shared_ptr<SearchNode>,

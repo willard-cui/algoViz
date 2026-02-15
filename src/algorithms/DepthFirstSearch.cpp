@@ -4,20 +4,6 @@
 
 namespace searching {
 
-// Helper structs for hashing shared_ptr<State> by value
-struct StatePtrHash {
-    size_t operator()(const std::shared_ptr<State>& s) const {
-        return s ? s->hash() : 0;
-    }
-};
-
-struct StatePtrEqual {
-    bool operator()(const std::shared_ptr<State>& a, const std::shared_ptr<State>& b) const {
-        if (!a || !b) return a == b;
-        return *a == *b;
-    }
-};
-
 SearchResult DepthFirstSearch::search(const SearchProblem& problem) {
     SearchResult result;
     // Use explored set for Graph Search to avoid infinite loops in cycles

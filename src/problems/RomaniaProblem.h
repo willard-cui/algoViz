@@ -22,17 +22,23 @@ public:
 
 class RomaniaProblem : public SearchProblem {
 public:
-    RomaniaProblem() {
+    RomaniaProblem(const std::string& start = "Arad", const std::string& goal = "Bucharest") 
+        : startCity(start), goalCity(goal) {
         initCityCoordinates();
         initRoadNetwork();
     }
     std::shared_ptr<State> getInitialState() const override {
-        return std::make_shared<RomaniaCityState>("Arad");
+        return std::make_shared<RomaniaCityState>(startCity);
     }
     bool isGoal(const State& state) const override {
         const RomaniaCityState* cityState = dynamic_cast<const RomaniaCityState*>(&state);
-        return cityState && cityState->city == "Bucharest";
+        return cityState && cityState->city == goalCity;
     }
+    
+    void setStartCity(const std::string& city) { startCity = city; }
+    void setGoalCity(const std::string& city) { goalCity = city; }
+    std::string getStartCity() const { return startCity; }
+    std::string getGoalCity() const { return goalCity; }
     std::vector<Action> getActions(const State& state) const override {
         const RomaniaCityState* cityState = dynamic_cast<const RomaniaCityState*>(&state);
         if (!cityState) return {};
@@ -67,7 +73,49 @@ public:
         return 0.0;
     }
 
+    struct CityCoordinates {
+        std::string name;
+        double x, y;
+    };
+
+    struct RoadConnection {
+        std::string from;
+        std::string to;
+        double distance;
+    };
+
+    std::vector<CityCoordinates> getAllCoordinates() const {
+        std::vector<CityCoordinates> result;
+        for (const auto& pair : coordinates) {
+            result.push_back({pair.first, pair.second.first, pair.second.second});
+        }
+        return result;
+    }
+
+    std::vector<RoadConnection> getAllRoads() const {
+        std::vector<RoadConnection> result;
+        std::unordered_set<std::string> processed;
+        
+        for (const auto& pair : roadNetwork) {
+            const std::string& from = pair.first;
+            for (const auto& action : pair.second) {
+                // Parse "ToDestination"
+                std::string to = action.name.substr(2);
+                
+                // Avoid duplicates (A->B and B->A)
+                std::string key = from < to ? from + "_" + to : to + "_" + from;
+                if (processed.find(key) == processed.end()) {
+                    result.push_back({from, to, action.cost});
+                    processed.insert(key);
+                }
+            }
+        }
+        return result;
+    }
+
 private:
+    std::string startCity;
+    std::string goalCity;
     std::unordered_map<std::string, std::pair<double, double>> coordinates;
     std::unordered_map<std::string, std::vector<Action>> roadNetwork;
     void initCityCoordinates() {
@@ -76,7 +124,7 @@ private:
         coordinates["Sibiu"] = {50, 20};
         coordinates["Timisoara"] = {-30, 10};
         coordinates["Zerind"] = {-20, -10};
-        coordinates["Oradea"] = {-40, -20};
+        coordinates["Oradea"] = {-40, -40};
         coordinates["Fagaras"] = {80, 40};
         coordinates["Rimnicu Vilcea"] = {60, 60};
         coordinates["Pitesti"] = {80, 80};

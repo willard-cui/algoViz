@@ -3,7 +3,7 @@
 
 namespace searching {
 
-std::vector<Action> SearchAlgorithm::extractSolution(std::shared_ptr<SearchNode> goalNode) const {
+std::vector<Action> SearchAlgorithm::extractSolution(const std::shared_ptr<SearchNode>& goalNode) const {
     std::vector<Action> solution;
     auto node = goalNode;
 

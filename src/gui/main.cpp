@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "../models/SidebarModel.h"
+#include "../models/VisualizationModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     // Register C++ types
-    qmlRegisterType<SidebarModel>("AlgoViz", 1, 0, "SidebarModel");
+    qmlRegisterType<VisualizationModel>("AlgoViz", 1, 0, "VisualizationModel");
 
     const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

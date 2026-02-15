@@ -71,10 +71,11 @@ private:
         std::shared_ptr<SearchNode> goalNode = nullptr;
     };
 
-    SearchBound depthLimitedSearch(std::shared_ptr<SearchNode> node,
+    SearchBound depthLimitedSearch(const std::shared_ptr<SearchNode>& node,
                                    const SearchProblem& problem,
                                    double fLimit,
-                                   std::vector<std::shared_ptr<SearchNode>>& path);
+                                   std::vector<std::shared_ptr<SearchNode>>& path,
+                                   std::vector<std::shared_ptr<State>>& visited);
 };
 
 class BidirectionalSearch : public SearchAlgorithm {
@@ -92,7 +93,7 @@ private:
         SearchResult result;
     };
 
-    RBFSResult rbfs(std::shared_ptr<SearchNode> node,
+    RBFSResult rbfs(const std::shared_ptr<SearchNode>& node,
                     const SearchProblem& problem,
                     double fLimit,
                     double& bestAlternative);

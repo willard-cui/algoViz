@@ -6,12 +6,7 @@ import AlgoViz 1.0
 Rectangle {
     color: "#2c3e50"
 
-    SidebarModel {
-        id: sidebarModel
-        onCurrentAlgorithmChanged: console.log("Current algorithm:", currentAlgorithm)
-        onSpeedChanged: console.log("Speed:", speed)
-        onIsRunningChanged: console.log("Is running:", isRunning)
-    }
+    property var visualizationModel
 
     ColumnLayout {
         anchors.fill: parent
@@ -21,7 +16,7 @@ Rectangle {
         // Platform title
         Label {
             Layout.fillWidth: true
-            text: "Algorithm Visualization Platform"
+            text: "Parametric Settings"
             color: "white"
             font.bold: true
             font.pixelSize: 16
@@ -33,37 +28,108 @@ Rectangle {
         GroupBox {
             Layout.fillWidth: true
             title: "Algorithm Selection"
-            background: Rectangle {
-                color: "#34495e"
-                radius: 5
-            }
             label: Label {
                 color: "white"
                 text: parent.title
                 font.bold: true
             }
+            background: Rectangle {
+                color: "#34495e"
+                radius: 5
+            }
+
+            topPadding: 20
 
             ColumnLayout {
-                width: parent.width
+                anchors.fill: parent
                 spacing: 8
 
                 ComboBox {
+                    id: algorithmCombo
                     Layout.fillWidth: true
-                    model: ["Select Algorithm", "BFS", "DFS", "A*", "Dijkstra", "Sorting", "Pathfinding"]
+                    model: ["Select Algorithm", "BFS", "DFS", "A*", "Uniform Cost", "Greedy Best First", "Depth Limited", "Iterative Deepening DFS", "Iterative Deepening A*", "Weighted A*"]
                     currentIndex: 0
                     background: Rectangle {
                         color: "white"
                         radius: 3
                     }
-                    onActivated: sidebarModel.currentAlgorithm = currentText
+                    onActivated: visualizationModel.currentAlgorithm = currentText
+                    Component.onCompleted: {
+                        if (visualizationModel) algorithmCombo.currentIndex = algorithmCombo.find(visualizationModel.currentAlgorithm)
+                    }
+                    Connections {
+                        target: visualizationModel
+                        function onCurrentAlgorithmChanged() {
+                            algorithmCombo.currentIndex = algorithmCombo.find(visualizationModel.currentAlgorithm)
+                        }
+                    }
                 }
 
                 Label {
-                    text: "No specific algorithms implemented.\nThis is a platform framework."
+                    text: "Select an algorithm to visualize."
                     color: "#bdc3c7"
                     font.pixelSize: 11
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
+                }
+
+                Label {
+                    text: "Start City"
+                    color: "white"
+                    font.bold: true
+                    Layout.topMargin: 10
+                }
+                
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: visualizationModel && visualizationModel.cities
+                           ? visualizationModel.cities.map(function(c) { return c.name })
+                           : []
+                    currentIndex: 0
+                    background: Rectangle {
+                        color: "white"
+                        radius: 3
+                    }
+                    onActivated: visualizationModel.startNode = currentText
+                    Component.onCompleted: {
+                        if (visualizationModel)
+                            currentIndex = find(visualizationModel.startNode)
+                    }
+                    Connections {
+                        target: visualizationModel
+                        function onStartNodeChanged() {
+                             parent.currentIndex = parent.find(visualizationModel.startNode)
+                        }
+                    }
+                }
+
+                Label {
+                    text: "Goal City"
+                    color: "white"
+                    font.bold: true
+                }
+                
+                ComboBox {
+                    Layout.fillWidth: true
+                    model: visualizationModel && visualizationModel.cities
+                           ? visualizationModel.cities.map(function(c) { return c.name })
+                           : []
+                    currentIndex: 1
+                    background: Rectangle {
+                        color: "white"
+                        radius: 3
+                    }
+                    onActivated: visualizationModel.goalNode = currentText
+                    Component.onCompleted: {
+                        if (visualizationModel)
+                            currentIndex = find(visualizationModel.goalNode)
+                    }
+                    Connections {
+                        target: visualizationModel
+                        function onGoalNodeChanged() {
+                             parent.currentIndex = parent.find(visualizationModel.goalNode)
+                        }
+                    }
                 }
             }
         }
@@ -72,6 +138,8 @@ Rectangle {
         GroupBox {
             Layout.fillWidth: true
             title: "Control Panel"
+
+            topPadding: 20
             background: Rectangle {
                 color: "#34495e"
                 radius: 5
@@ -88,25 +156,18 @@ Rectangle {
 
                 Button {
                     Layout.fillWidth: true
-                    text: "Initialize"
-                    highlighted: true
-                    onClicked: sidebarModel.initialize()
-                }
-
-                Button {
-                    Layout.fillWidth: true
                     text: "Step Forward"
-                    onClicked: sidebarModel.stepForward()
+                    onClicked: visualizationModel.stepForward()
                 }
 
                 Button {
                     Layout.fillWidth: true
-                    text: sidebarModel.isRunning ? "Pause" : "Run"
+                    text: visualizationModel && visualizationModel.isRunning ? "Pause" : "Run"
                     onClicked: {
-                        if (sidebarModel.isRunning) {
-                            sidebarModel.pause()
+                        if (visualizationModel.isRunning) {
+                            visualizationModel.pause()
                         } else {
-                            sidebarModel.run()
+                            visualizationModel.startAlgorithm(visualizationModel.currentAlgorithm)
                         }
                     }
                 }
@@ -114,7 +175,7 @@ Rectangle {
                 Button {
                     Layout.fillWidth: true
                     text: "Reset"
-                    onClicked: sidebarModel.reset()
+                    onClicked: visualizationModel.reset()
                 }
 
                 RowLayout {
@@ -130,9 +191,9 @@ Rectangle {
                         Layout.fillWidth: true
                         from: 1
                         to: 10
-                        value: 5
+                        value: visualizationModel ? visualizationModel.speed : 5
                         id: speedSlider
-                        onMoved: sidebarModel.speed = value
+                        onMoved: if (visualizationModel) visualizationModel.speed = value
                     }
 
                     Label {
@@ -148,6 +209,7 @@ Rectangle {
         GroupBox {
             Layout.fillWidth: true
             title: "Visualization Settings"
+            topPadding: 20
             background: Rectangle {
                 color: "#34495e"
                 radius: 5
@@ -197,7 +259,6 @@ Rectangle {
             }
         }
 
-        // Spacer to push info to bottom
         Item {
             Layout.fillHeight: true
         }

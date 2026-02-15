@@ -46,6 +46,19 @@ struct SearchNode {
         : state(s), parent(p), action(a), pathCost(cost), depth(d) {}
 };
 
+struct StatePtrHash {
+    size_t operator()(const std::shared_ptr<State>& s) const {
+        return s ? s->hash() : 0;
+    }
+};
+
+struct StatePtrEqual {
+    bool operator()(const std::shared_ptr<State>& a, const std::shared_ptr<State>& b) const {
+        if (!a || !b) return a == b;
+        return *a == *b;
+    }
+};
+
 struct SearchResult {
     bool success = false;
     std::vector<Action> solution;
@@ -61,7 +74,7 @@ public:
     virtual SearchResult search(const SearchProblem& problem) = 0;
 
 protected:
-    std::vector<Action> extractSolution(std::shared_ptr<SearchNode> goalNode) const;
+    std::vector<Action> extractSolution(const std::shared_ptr<SearchNode>& goalNode) const;
 };
 
 } // namespace searching

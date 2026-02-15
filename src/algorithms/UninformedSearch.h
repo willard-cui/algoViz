@@ -29,7 +29,7 @@ public:
 
 private:
     int depthLimit;
-    SearchResult recursiveDLS(std::shared_ptr<SearchNode> node,
+    SearchResult recursiveDLS(const std::shared_ptr<SearchNode>& node,
                              const SearchProblem& problem,
                              int depth);
 };

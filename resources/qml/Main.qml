@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
+import AlgoViz 1.0
 
 Window {
     width: 1200
@@ -9,6 +10,11 @@ Window {
     visible: true
     title: qsTr("Algorithm Visualization Platform")
     color: "#f5f5f5"
+
+    VisualizationModel {
+        id: vizModel
+        onIsRunningChanged: console.log("Viz Running:", isRunning)
+    }
 
     // Main application layout
     Rectangle {
@@ -19,6 +25,7 @@ Window {
         // Left sidebar - Algorithm selection and controls
         Sidebar {
             id: leftSidebar
+            visualizationModel: vizModel
             anchors {
                 top: parent.top
                 bottom: parent.bottom
@@ -53,6 +60,7 @@ Window {
         // Main visualization area
         VisualizationArea {
             id: visualizationArea
+            visualizationModel: vizModel
             anchors {
                 top: parent.top
                 bottom: parent.bottom

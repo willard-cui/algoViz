@@ -6,7 +6,7 @@ namespace searching {
 
 SearchResult UniformCostSearch::search(const SearchProblem& problem) {
     SearchResult result;
-    std::unordered_map<std::shared_ptr<State>, double> reached; // state -> best cost so far
+    std::unordered_map<std::shared_ptr<State>, double, StatePtrHash, StatePtrEqual> reached; // state -> best cost so far
 
     auto initialState = problem.getInitialState();
     auto rootNode = std::make_shared<SearchNode>(initialState);

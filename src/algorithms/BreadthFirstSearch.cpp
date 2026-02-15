@@ -6,7 +6,7 @@ namespace searching {
 
 SearchResult BreadthFirstSearch::search(const SearchProblem& problem) {
     SearchResult result;
-    std::unordered_set<std::shared_ptr<State>> reached;
+    std::unordered_set<std::shared_ptr<State>, StatePtrHash, StatePtrEqual> reached;
 
     auto initialState = problem.getInitialState();
     auto rootNode = std::make_shared<SearchNode>(initialState);
