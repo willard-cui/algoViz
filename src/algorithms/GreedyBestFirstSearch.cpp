@@ -1,4 +1,4 @@
-#include "InformedSearch.h"
+#include "GreedyBestFirstSearch.h"
 #include <unordered_map>
 #include <queue>
 #include <iostream>
@@ -31,7 +31,7 @@ SearchResult GreedyBestFirstSearch::search(const SearchProblem& problem) {
         auto node = frontier.top();
         frontier.pop();
         result.nodesExpanded++;
-
+        result.visitedStates.push_back(node->state);
         // Check if this is still the best path to this state
         // (For greedy search, we might not need this check strictly,
         // but it helps avoid redundant work)
@@ -70,7 +70,7 @@ SearchResult GreedyBestFirstSearch::search(const SearchProblem& problem) {
 
             frontier.push(childNode);
             reached[childState] = childHValue;
-            result.visitedStates.push_back(childState);
+            
         }
     }
 

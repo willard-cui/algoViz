@@ -1,4 +1,4 @@
-#include "InformedSearch.h"
+#include "AStarSearch.h"
 #include <unordered_map>
 #include <queue>
 #include <iostream>
@@ -31,7 +31,7 @@ SearchResult AStarSearch::search(const SearchProblem& problem) {
         auto node = frontier.top();
         frontier.pop();
         result.nodesExpanded++;
-
+        result.visitedStates.push_back(node->state);
         // Check if this is still the best path to this state
         double fValue = node->pathCost + problem.heuristic(*node->state);
         auto it = reached.find(node->state);
@@ -61,7 +61,7 @@ SearchResult AStarSearch::search(const SearchProblem& problem) {
             // Check if we found a better path to this state
             auto childIt = reached.find(childState);
             if (childIt != reached.end() && newFValue >= childIt->second - 1e-9) {
-                continue; // Not better
+                continue;
             }
 
             auto childNode = std::make_shared<SearchNode>(
@@ -69,7 +69,7 @@ SearchResult AStarSearch::search(const SearchProblem& problem) {
 
             frontier.push(childNode);
             reached[childState] = newFValue;
-            result.visitedStates.push_back(childState);
+            
         }
     }
 

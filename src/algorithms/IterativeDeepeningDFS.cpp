@@ -1,4 +1,5 @@
-#include "UninformedSearch.h"
+#include "IterativeDeepeningDFS.h"
+#include "DepthLimitedSearch.h"
 #include <iostream>
 
 namespace searching {

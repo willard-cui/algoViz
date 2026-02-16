@@ -90,7 +90,8 @@ Rectangle {
                         y: mapContainer.toScreenY(modelData.y) - height/2
                         
                         color: {
-                            if (!visualizationModel) return "#34495e";
+                            if (!visualizationModel) 
+                                return "#34495e";
                             
                             // Check if in path (solution)
                             var inPath = false;
@@ -100,7 +101,8 @@ Rectangle {
                                     break;
                                 }
                             }
-                            if (inPath) return "#e74c3c"; // Red for path
+                            if (inPath) 
+                                return "#e74c3c"; // Red for path
                             
                             // Check if current node
                             if (visualizationModel.currentNode === modelData.name) return "#f1c40f"; // Yellow for current
@@ -113,7 +115,8 @@ Rectangle {
                                     break;
                                 }
                             }
-                            if (visited) return "#2ecc71"; // Green for visited
+                            if (visited) 
+                                return "#2ecc71"; // Green for visited
                             
                             // Check if start or goal
                             if (modelData.name === visualizationModel.startNode || modelData.name === visualizationModel.goalNode) {

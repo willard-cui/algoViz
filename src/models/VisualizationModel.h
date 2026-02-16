@@ -41,6 +41,7 @@ class VisualizationModel : public QObject {
     QTimer* myTimer;
     QString myLastAlgorithmName;
     QString myCurrentAlgorithm;
+    QVariantList myAlgorithms;
 
 public:
     explicit VisualizationModel(QObject* parent = nullptr);
@@ -58,6 +59,7 @@ public:
     Q_PROPERTY(QString startNode READ startNode WRITE setStartNode NOTIFY startNodeChanged)
     Q_PROPERTY(QString goalNode READ goalNode WRITE setGoalNode NOTIFY goalNodeChanged)
     Q_PROPERTY(QString currentAlgorithm READ currentAlgorithm WRITE setCurrentAlgorithm NOTIFY currentAlgorithmChanged)
+    Q_PROPERTY(QVariantList algorithms READ algorithms CONSTANT)
 
     bool isRunning() const;
     int speed() const;
@@ -74,6 +76,7 @@ public:
     void setGoalNode(const QString& node);
     QString currentAlgorithm() const;
     void setCurrentAlgorithm(const QString& name);
+    QVariantList algorithms() const;
 
     Q_INVOKABLE void startAlgorithm(const QString& algorithmName);
     Q_INVOKABLE void pause();

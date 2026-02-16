@@ -1,4 +1,4 @@
-#include "InformedSearch.h"
+#include "WeightedAStarSearch.h"
 #include <unordered_map>
 #include <queue>
 #include <iostream>
@@ -9,7 +9,7 @@ SearchResult WeightedAStarSearch::search(const SearchProblem& problem) {
     SearchResult result;
     std::unordered_map<std::shared_ptr<State>, double, StatePtrHash, StatePtrEqual> reached; // state -> best weighted f-cost
 
-    NodeComparator comparator(&problem, weight);
+    NodeComparator comparator(&problem, myWeight);
     std::priority_queue<std::shared_ptr<SearchNode>,
                        std::vector<std::shared_ptr<SearchNode>>,
                        NodeComparator> frontier(comparator);
@@ -18,7 +18,7 @@ SearchResult WeightedAStarSearch::search(const SearchProblem& problem) {
     auto rootNode = std::make_shared<SearchNode>(initialState);
 
     frontier.push(rootNode);
-    reached[initialState] = weight * problem.heuristic(*initialState); // f = g + ε*h, g=0 initially
+    reached[initialState] = myWeight * problem.heuristic(*initialState); // f = g + ε*h, g=0 initially
     result.nodesExpanded = 0;
     result.maxFrontierSize = 1;
 
@@ -33,7 +33,7 @@ SearchResult WeightedAStarSearch::search(const SearchProblem& problem) {
         result.nodesExpanded++;
 
         // Check if this is still the best path to this state
-        double fValue = node->pathCost + weight * problem.heuristic(*node->state);
+        double fValue = node->pathCost + myWeight * problem.heuristic(*node->state);
         auto it = reached.find(node->state);
         if (it != reached.end() && fValue > it->second + 1e-9) {
             // Found a better path to this state already, skip
@@ -56,7 +56,7 @@ SearchResult WeightedAStarSearch::search(const SearchProblem& problem) {
 
             double stepCost = problem.getStepCost(*node->state, action, *childState);
             double newPathCost = node->pathCost + stepCost;
-            double newFValue = newPathCost + weight * problem.heuristic(*childState);
+            double newFValue = newPathCost + myWeight * problem.heuristic(*childState);
 
             // Check if we found a better path to this state
             auto childIt = reached.find(childState);

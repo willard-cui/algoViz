@@ -1,4 +1,4 @@
-#include "UninformedSearch.h"
+#include "BreadthFirstSearch.h"
 #include <unordered_set>
 #include <iostream>
 
@@ -11,29 +11,22 @@ SearchResult BreadthFirstSearch::search(const SearchProblem& problem) {
     auto initialState = problem.getInitialState();
     auto rootNode = std::make_shared<SearchNode>(initialState);
 
-    frontier.push(rootNode);
+    myFrontier.push(rootNode);
     reached.insert(initialState);
     result.nodesExpanded = 0;
     result.maxFrontierSize = 1;
 
-    while (!frontier.empty()) {
+    while (!myFrontier.empty()) {
         // Update max frontier size
-        if (frontier.size() > result.maxFrontierSize) {
-            result.maxFrontierSize = frontier.size();
+        if (myFrontier.size() > result.maxFrontierSize) {
+            result.maxFrontierSize = myFrontier.size();
         }
 
-        auto node = frontier.front();
-        frontier.pop();
+        
+        auto node = myFrontier.front();
+        myFrontier.pop();
         result.nodesExpanded++;
-
-        // Check if goal
-        if (problem.isGoal(*node->state)) {
-            result.success = true;
-            result.solution = extractSolution(node);
-            result.totalCost = node->pathCost;
-            return result;
-        }
-
+        result.visitedStates.push_back(node->state);
         // Expand node
         auto actions = problem.getActions(*node->state);
         for (const auto& action : actions) {
@@ -49,9 +42,15 @@ SearchResult BreadthFirstSearch::search(const SearchProblem& problem) {
             auto childNode = std::make_shared<SearchNode>(
                 childState, node, action, node->pathCost + stepCost, node->depth + 1);
 
-            frontier.push(childNode);
+            myFrontier.push(childNode);
             reached.insert(childState);
-            result.visitedStates.push_back(childState);
+            
+            if (problem.isGoal(*childNode->state)) {
+                result.success = true;
+                result.solution = extractSolution(childNode);
+                result.totalCost = childNode->pathCost;
+                return result;
+            }
         }
     }
 

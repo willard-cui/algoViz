@@ -47,7 +47,7 @@ Rectangle {
                 ComboBox {
                     id: algorithmCombo
                     Layout.fillWidth: true
-                    model: ["Select Algorithm", "BFS", "DFS", "A*", "Uniform Cost", "Greedy Best First", "Depth Limited", "Iterative Deepening DFS", "Iterative Deepening A*", "Weighted A*"]
+                    model: visualizationModel && visualizationModel.algorithms ? visualizationModel.algorithms : []
                     currentIndex: 0
                     background: Rectangle {
                         color: "white"

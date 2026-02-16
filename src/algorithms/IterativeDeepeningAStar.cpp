@@ -1,4 +1,4 @@
-#include "InformedSearch.h"
+#include "IterativeDeepeningAStar.h"
 #include <limits>
 #include <algorithm>
 #include <iostream>

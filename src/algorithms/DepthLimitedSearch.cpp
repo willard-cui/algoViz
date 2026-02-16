@@ -1,4 +1,4 @@
-#include "UninformedSearch.h"
+#include "DepthLimitedSearch.h"
 #include <iostream>
 
 namespace searching {
@@ -6,7 +6,7 @@ namespace searching {
 SearchResult DepthLimitedSearch::search(const SearchProblem& problem) {
     SearchResult result;
     result = recursiveDLS(std::make_shared<SearchNode>(problem.getInitialState()),
-                         problem, depthLimit);
+                         problem, myDepthLimit);
     return result;
 }
 

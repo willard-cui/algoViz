@@ -1,4 +1,4 @@
-#include "UninformedSearch.h"
+#include "DepthFirstSearch.h"
 #include <unordered_set>
 #include <iostream>
 
@@ -12,28 +12,21 @@ SearchResult DepthFirstSearch::search(const SearchProblem& problem) {
     auto initialState = problem.getInitialState();
     auto rootNode = std::make_shared<SearchNode>(initialState);
 
-    frontier.push(rootNode);
+    myFrontier.push(rootNode);
     explored.insert(initialState);
     result.nodesExpanded = 0;
     result.maxFrontierSize = 1;
 
-    while (!frontier.empty()) {
+    while (!myFrontier.empty()) {
         // Update max frontier size
-        if (frontier.size() > result.maxFrontierSize) {
-            result.maxFrontierSize = frontier.size();
+        if (myFrontier.size() > result.maxFrontierSize) {
+            result.maxFrontierSize = myFrontier.size();
         }
 
-        auto node = frontier.top();
-        frontier.pop();
+        auto node = myFrontier.top();
+        myFrontier.pop();
+        result.visitedStates.push_back(node->state);
         result.nodesExpanded++;
-
-        // Check if goal
-        if (problem.isGoal(*node->state)) {
-            result.success = true;
-            result.solution = extractSolution(node);
-            result.totalCost = node->pathCost;
-            return result;
-        }
 
         // Expand node
         auto actions = problem.getActions(*node->state);
@@ -54,9 +47,14 @@ SearchResult DepthFirstSearch::search(const SearchProblem& problem) {
             auto childNode = std::make_shared<SearchNode>(
                 childState, node, action, node->pathCost + stepCost, node->depth + 1);
 
-            frontier.push(childNode);
+            myFrontier.push(childNode);
             explored.insert(childState);
-            result.visitedStates.push_back(childState);
+            if (problem.isGoal(*childNode->state)) {
+                result.success = true;
+                result.solution = extractSolution(childNode);
+                result.totalCost = childNode->pathCost;
+                return result;
+            }
         }
     }
 

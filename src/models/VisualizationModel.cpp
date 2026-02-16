@@ -15,6 +15,17 @@ VisualizationModel::VisualizationModel(QObject* parent)
       myCurrentStepIndex(0),
       myLastAlgorithmName(""),
       myTimer(nullptr) {
+    myAlgorithms.clear();
+    myAlgorithms.append("Select Algorithm");
+    myAlgorithms.append("BFS");
+    myAlgorithms.append("DFS");
+    myAlgorithms.append("Uniform Cost");
+    myAlgorithms.append("Greedy Best First");
+    myAlgorithms.append("A*");
+    myAlgorithms.append("Depth Limited");
+    myAlgorithms.append("Iterative Deepening DFS");
+    myAlgorithms.append("Iterative Deepening A*");
+    myAlgorithms.append("Weighted A*");
     myProblem = std::make_unique<RomaniaProblem>();
     loadProblemData();
     
@@ -115,6 +126,10 @@ void VisualizationModel::setCurrentAlgorithm(const QString& name) {
         return;
     myCurrentAlgorithm = name;
     emit currentAlgorithmChanged();
+}
+
+QVariantList VisualizationModel::algorithms() const {
+    return myAlgorithms;
 }
 
 void VisualizationModel::startAlgorithm(const QString& algorithmName) {
