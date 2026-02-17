@@ -1,10 +1,11 @@
+#include "models/VisualizationModel.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "../models/VisualizationModel.h"
+#include <QQuickStyle>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+    //QQuickStyle::setStyle("Material"); 
     QGuiApplication app(argc, argv);
 
     // Set application metadata
@@ -17,7 +18,7 @@ int main(int argc, char *argv[])
     // Register C++ types
     qmlRegisterType<VisualizationModel>("AlgoViz", 1, 0, "VisualizationModel");
 
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/AlgoViz/src/gui/qml/Main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)

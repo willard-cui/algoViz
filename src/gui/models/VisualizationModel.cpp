@@ -14,7 +14,8 @@ VisualizationModel::VisualizationModel(QObject* parent)
       myCurrentAlgorithm("Select Algorithm"),
       myCurrentStepIndex(0),
       myLastAlgorithmName(""),
-      myTimer(nullptr) {
+      myTimer(nullptr),
+      myInfoPanelModel(new InfoPanelModel(this)) {
     myAlgorithms.clear();
     myAlgorithms.append("Select Algorithm");
     myAlgorithms.append("BFS");
@@ -31,6 +32,8 @@ VisualizationModel::VisualizationModel(QObject* parent)
     
     myTimer = new QTimer(this);
     connect(myTimer, &QTimer::timeout, this, &VisualizationModel::onTimerTimeout);
+
+    
 }
 
 VisualizationModel::~VisualizationModel() = default;
@@ -60,6 +63,10 @@ void VisualizationModel::loadProblemData() {
     emit roadsChanged();
     
     qDebug() << "Loaded" << myCities.count() << "cities and" << myRoads.count() << "roads";
+}
+
+InfoPanelModel* VisualizationModel::infoPanelModel() const {
+    return myInfoPanelModel;
 }
 
 bool VisualizationModel::isRunning() const {
@@ -142,7 +149,7 @@ void VisualizationModel::startAlgorithm(const QString& algorithmName) {
     }
     
     if (myAllVisitedStates.empty()) {
-        qDebug() << "No algorithm executed or empty result.";
+        myInfoPanelModel->logInfo("No algorithm executed or empty result.");
         return;
     }
 
@@ -152,8 +159,8 @@ void VisualizationModel::startAlgorithm(const QString& algorithmName) {
     int interval = 1000 - (mySpeed - 1) * 100;
     if (interval < 50) interval = 50;
     myTimer->start(interval);
-    
-    qDebug() << "Algorithm started:" << algorithmName;
+    myInfoPanelModel->logInfo("Algorithm started: " + algorithmName);
+    myInfoPanelModel->logInfo(QString("Algorithm calculated. Steps: %1, Cost: %2").arg(myAllVisitedStates.size()).arg(myResult.totalCost));
 }
 
 void VisualizationModel::resume() {
@@ -165,6 +172,7 @@ void VisualizationModel::resume() {
     myIsRunning = true;
     emit isRunningChanged();
     myTimer->start(); 
+    myInfoPanelModel->logInfo("Algorithm resumed");
 }
 
 void VisualizationModel::pause() {
@@ -175,7 +183,7 @@ void VisualizationModel::pause() {
     emit isRunningChanged();
     myTimer->stop();
     
-    qDebug() << "Algorithm paused";
+    myInfoPanelModel->logInfo("Algorithm paused");
 }
 
 void VisualizationModel::reset() {
@@ -183,15 +191,18 @@ void VisualizationModel::reset() {
     
     myVisitedNodes.clear();
     myPathNodes.clear();
-    myCurrentNode = "";
-    myCurrentStepIndex = 0;
     myAllVisitedStates.clear();
+    myCurrentStepIndex = 0;
+    myCurrentNode = "";
+    
+    myResult = SearchResult(); // Reset result
     
     emit visitedNodesChanged();
     emit pathNodesChanged();
     emit currentNodeChanged();
     
-    qDebug() << "Visualization reset";
+    
+    myInfoPanelModel->logInfo("Visualization reset");
 }
 
 void VisualizationModel::executeAlgorithm(const QString& algorithmName) {
@@ -219,15 +230,14 @@ void VisualizationModel::executeAlgorithm(const QString& algorithmName) {
     } else if (algorithmName == "Weighted A*") {
         myAlgorithm = std::make_unique<WeightedAStarSearch>(1.5);
     } else {
-        qDebug() << "Unknown algorithm:" << algorithmName;
+        myInfoPanelModel->logInfo("Unknown algorithm: " + algorithmName);
         return;
     }
     
-    qDebug() << "Running algorithm..." << algorithmName;
+    myInfoPanelModel->logInfo("Running algorithm..." + algorithmName);
     myResult = myAlgorithm->search(*myProblem);
     
-    myAllVisitedStates = myResult.visitedStates;
-    qDebug() << "Algorithm finished. Visited nodes:" << myAllVisitedStates.size();
+    myAllVisitedStates = myResult.visitedStates;   
     
     myCurrentStepIndex = 0;
 }
@@ -259,7 +269,6 @@ void VisualizationModel::stepForward() {
         }
         
         myCurrentStepIndex++;
-        emit algorithmStepped();
     } else {
         if (myPathNodes.isEmpty() && !myResult.solution.empty()) {
             auto currentState = myProblem->getInitialState();
@@ -272,7 +281,11 @@ void VisualizationModel::stepForward() {
                 if (cityState) myPathNodes.append(QString::fromStdString(cityState->city));
             }
             emit pathNodesChanged();
-            emit algorithmFinished();
+            const QString statusText = myResult.success ? "Success" : "Failed";
+            myInfoPanelModel->logInfo(QString("Algorithm finished. Status: %1, Nodes Expanded: %2, Total Cost: %3")
+                .arg(statusText)
+                .arg(myResult.nodesExpanded)
+                .arg(myResult.totalCost, 0, 'f', 2));
             
             pause();
         }

@@ -1,6 +1,6 @@
-#ifndef VISUALIZATIONMODEL_H
-#define VISUALIZATIONMODEL_H
+#pragma once
 
+#include "InfoPanelModel.h"
 #include "../algorithms/SearchAlgorithm.h"
 #include <QObject>
 #include <QString>
@@ -23,6 +23,9 @@ class VisualizationModel : public QObject {
     bool myIsRunning;
     int mySpeed;
     
+    // Info Panel Model
+    InfoPanelModel* myInfoPanelModel;
+
     // Problem and Algorithm
     std::unique_ptr<searching::RomaniaProblem> myProblem;
     std::unique_ptr<searching::SearchAlgorithm> myAlgorithm;
@@ -60,7 +63,10 @@ public:
     Q_PROPERTY(QString goalNode READ goalNode WRITE setGoalNode NOTIFY goalNodeChanged)
     Q_PROPERTY(QString currentAlgorithm READ currentAlgorithm WRITE setCurrentAlgorithm NOTIFY currentAlgorithmChanged)
     Q_PROPERTY(QVariantList algorithms READ algorithms CONSTANT)
+    Q_PROPERTY(InfoPanelModel* infoPanelModel READ infoPanelModel CONSTANT)
 
+    InfoPanelModel* infoPanelModel() const;
+    
     bool isRunning() const;
     int speed() const;
     void setSpeed(int speed);
@@ -101,8 +107,6 @@ signals:
     void startNodeChanged();
     void goalNodeChanged();
     void currentAlgorithmChanged();
-    void algorithmStepped();
-    void algorithmFinished();
 
 private slots:
     void onTimerTimeout();

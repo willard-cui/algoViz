@@ -4,8 +4,9 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 Rectangle {
-    color: "#ecf0f1"
+    color: theme.appBackground
     property var visualizationModel
+    property var theme
 
     ColumnLayout {
         anchors.fill: parent
@@ -15,14 +16,14 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 40
-            color: "#3498db"
+            color: theme.accentPrimary
 
             Label {
                 anchors.centerIn: parent
                 text: visualizationModel && visualizationModel.currentAlgorithm && visualizationModel.currentAlgorithm !== "" 
                       ? "Visualizing: " + visualizationModel.currentAlgorithm 
                       : "Visualization Area"
-                color: "white"
+                color: theme.textOnDark
                 font.bold: true
                 font.pixelSize: 14
             }
@@ -33,18 +34,18 @@ Rectangle {
             id: canvasArea
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "white"
-            border.color: "#bdc3c7"
-            border.width: 1
+            color: theme.surfaceBackground
+            border.color: theme.divider
+            border.width: theme.canvasBorderWidth
             clip: true
 
             // Map Container
             Item {
                 id: mapContainer
-                width: 600
-                height: 400
+                width: theme.mapContainerWidth
+                height: theme.mapContainerHeight
                 anchors.centerIn: parent
-                scale: Math.min(parent.width / 650, parent.height / 450)
+                scale: Math.min(parent.width / theme.mapScaleRefWidth, parent.height / theme.mapScaleRefHeight)
                 
                 // Coordinate transformation: 
                 // Map range: X[-40, 170], Y[-20, 120] -> width ~210, height ~140
@@ -53,9 +54,9 @@ Rectangle {
                 // Center of container: (300, 200)
                 // Scale factor: 2.5
                 
-                property real mapScale: 2.5
-                property real centerX: 300
-                property real centerY: 200
+                property real mapScale: theme.mapScale
+                property real centerX: mapContainer.width / 2
+                property real centerY: mapContainer.height / 2
                 property real mapCenterX: 65
                 property real mapCenterY: 50
                 
@@ -67,8 +68,8 @@ Rectangle {
                     model: visualizationModel ? visualizationModel.roads : []
                     Shape {
                         ShapePath {
-                            strokeWidth: 2
-                            strokeColor: "#bdc3c7"
+                            strokeWidth: theme.roadStrokeWidth
+                            strokeColor: theme.divider
                             startX: mapContainer.toScreenX(modelData.fromX !== undefined ? modelData.fromX : canvasArea.getCityX(modelData.from))
                             startY: mapContainer.toScreenY(modelData.fromY !== undefined ? modelData.fromY : canvasArea.getCityY(modelData.from))
                             PathLine {
@@ -83,15 +84,15 @@ Rectangle {
                 Repeater {
                     model: visualizationModel ? visualizationModel.cities : []
                     Rectangle {
-                        width: 20
-                        height: 20
-                        radius: 10
+                        width: theme.citySize
+                        height: theme.citySize
+                        radius: theme.citySize / 2
                         x: mapContainer.toScreenX(modelData.x) - width/2
                         y: mapContainer.toScreenY(modelData.y) - height/2
                         
                         color: {
                             if (!visualizationModel) 
-                                return "#34495e";
+                                return theme.chromeBackground;
                             
                             // Check if in path (solution)
                             var inPath = false;
@@ -102,10 +103,10 @@ Rectangle {
                                 }
                             }
                             if (inPath) 
-                                return "#e74c3c"; // Red for path
+                                return theme.highlightPath; // Red for path
                             
                             // Check if current node
-                            if (visualizationModel.currentNode === modelData.name) return "#f1c40f"; // Yellow for current
+                            if (visualizationModel.currentNode === modelData.name) return theme.highlightCurrent; // Yellow for current
                             
                             // Check if visited
                             var visited = false;
@@ -116,26 +117,26 @@ Rectangle {
                                 }
                             }
                             if (visited) 
-                                return "#2ecc71"; // Green for visited
+                                return theme.highlightVisited; // Green for visited
                             
                             // Check if start or goal
                             if (modelData.name === visualizationModel.startNode || modelData.name === visualizationModel.goalNode) {
-                                return "#e74c3c"; // Red for Start/Goal
+                                return theme.highlightPath; // Red for Start/Goal
                             }
                             
-                            return "#34495e"; // Default
+                            return theme.chromeBackground; // Default
                         }
                         
-                        border.color: "white"
-                        border.width: 2
+                        border.color: theme.surfaceBackground
+                        border.width: theme.cityBorderWidth
                         
                         Text {
                             anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -15
+                            anchors.verticalCenterOffset: theme.cityLabelOffsetY
                             text: modelData.name
-                            font.pixelSize: 12
+                            font.pixelSize: theme.fontSizeSm
                             style: Text.Outline
-                            styleColor: "white"
+                            styleColor: theme.surfaceBackground
                         }
                     }
                 }
@@ -160,40 +161,6 @@ Rectangle {
                 return 0;
             }
         }
-
-        // Bottom status bar
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 30
-            color: "#2c3e50"
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 5
-
-                Label {
-                    text: visualizationModel ? "Nodes Visited: " + visualizationModel.visitedNodes.length : "Not ready"
-                    color: "white"
-                    font.pixelSize: 11
-                }
-
-                Item { Layout.fillWidth: true }
-                
-                Label {
-                    text: visualizationModel && visualizationModel.pathNodes.length > 0 ? "Path Found! Length: " + visualizationModel.pathNodes.length : ""
-                    color: "#2ecc71"
-                    font.pixelSize: 11
-                    font.bold: true
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Label {
-                    text: visualizationModel ? (visualizationModel.isRunning ? "Running..." : "Ready") : "Initializing..."
-                    color: "#bdc3c7"
-                    font.pixelSize: 11
-                }
-            }
-        }
+        
     }
 }

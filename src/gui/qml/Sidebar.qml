@@ -1,27 +1,29 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.Fusion
 import AlgoViz 1.0
 
 Rectangle {
-    color: "#2c3e50"
+    color: theme.chromeBackground
 
     property var visualizationModel
+    property var theme
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
+        anchors.margins: theme.spacingMd
         spacing: 15
 
         // Platform title
-        Label {
+        Text {
             Layout.fillWidth: true
             text: "Parametric Settings"
-            color: "white"
+            color: theme.textOnDark
             font.bold: true
-            font.pixelSize: 16
+            font.pixelSize: theme.fontSizeTitle
             horizontalAlignment: Text.AlignHCenter
-            padding: 10
+            padding: theme.spacingMd
         }
 
         // Algorithm selection section
@@ -29,29 +31,30 @@ Rectangle {
             Layout.fillWidth: true
             title: "Algorithm Selection"
             label: Label {
-                color: "white"
+                color: theme.textOnDark
                 text: parent.title
                 font.bold: true
             }
             background: Rectangle {
-                color: "#34495e"
-                radius: 5
+                color: theme.sideBarPaneColor
+                radius: theme.cornerRadiusMd
             }
 
             topPadding: 20
 
             ColumnLayout {
                 anchors.fill: parent
-                spacing: 8
+                spacing: theme.spacingSm
 
                 ComboBox {
                     id: algorithmCombo
                     Layout.fillWidth: true
+                    implicitHeight: 25
                     model: visualizationModel && visualizationModel.algorithms ? visualizationModel.algorithms : []
                     currentIndex: 0
                     background: Rectangle {
-                        color: "white"
-                        radius: 3
+                        color: theme.surfaceBackground
+                        radius: theme.cornerRadiusSm
                     }
                     onActivated: visualizationModel.currentAlgorithm = currentText
                     Component.onCompleted: {
@@ -67,28 +70,29 @@ Rectangle {
 
                 Label {
                     text: "Select an algorithm to visualize."
-                    color: "#bdc3c7"
-                    font.pixelSize: 11
+                    color: theme.divider
+                    font.pixelSize: theme.fontSizeSm
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Label {
                     text: "Start City"
-                    color: "white"
+                    color: theme.textOnDark
                     font.bold: true
-                    Layout.topMargin: 10
+                    Layout.topMargin: theme.spacingMd
                 }
                 
                 ComboBox {
                     Layout.fillWidth: true
+                    implicitHeight: 25
                     model: visualizationModel && visualizationModel.cities
                            ? visualizationModel.cities.map(function(c) { return c.name })
                            : []
                     currentIndex: 0
                     background: Rectangle {
-                        color: "white"
-                        radius: 3
+                        color: theme.surfaceBackground
+                        radius: theme.cornerRadiusSm
                     }
                     onActivated: visualizationModel.startNode = currentText
                     Component.onCompleted: {
@@ -105,19 +109,20 @@ Rectangle {
 
                 Label {
                     text: "Goal City"
-                    color: "white"
+                    color: theme.textOnDark
                     font.bold: true
                 }
                 
                 ComboBox {
                     Layout.fillWidth: true
+                    implicitHeight: 25
                     model: visualizationModel && visualizationModel.cities
                            ? visualizationModel.cities.map(function(c) { return c.name })
                            : []
                     currentIndex: 1
                     background: Rectangle {
-                        color: "white"
-                        radius: 3
+                        color: theme.surfaceBackground
+                        radius: theme.cornerRadiusSm
                     }
                     onActivated: visualizationModel.goalNode = currentText
                     Component.onCompleted: {
@@ -141,18 +146,18 @@ Rectangle {
 
             topPadding: 20
             background: Rectangle {
-                color: "#34495e"
-                radius: 5
+                color: theme.sideBarPaneColor
+                radius: theme.cornerRadiusMd
             }
             label: Label {
-                color: "white"
+                color: theme.textOnDark
                 text: parent.title
                 font.bold: true
             }
 
             ColumnLayout {
                 width: parent.width
-                spacing: 10
+                spacing: theme.spacingMd
 
                 Button {
                     Layout.fillWidth: true
@@ -184,7 +189,7 @@ Rectangle {
 
                     Label {
                         text: "Speed:"
-                        color: "white"
+                        color: theme.textOnDark
                     }
 
                     Slider {
@@ -198,7 +203,7 @@ Rectangle {
 
                     Label {
                         text: speedSlider.value.toFixed(0)
-                        color: "white"
+                        color: theme.textOnDark
                         Layout.preferredWidth: 30
                     }
                 }
@@ -211,25 +216,24 @@ Rectangle {
             title: "Visualization Settings"
             topPadding: 20
             background: Rectangle {
-                color: "#34495e"
-                radius: 5
+                color: theme.sideBarPaneColor
+                radius: theme.cornerRadiusMd
             }
-            label: Label {
-                color: "white"
+            label: Text {
+                color: theme.textOnDark
                 text: parent.title
-                font.bold: true
             }
 
             ColumnLayout {
                 width: parent.width
-                spacing: 8
+                spacing: theme.spacingSm
 
                 CheckBox {
                     text: "Show Grid"
                     checked: true
                     contentItem: Text {
                         text: parent.text
-                        color: "white"
+                        color: theme.textOnDark
                         verticalAlignment: Text.AlignVCenter
                         leftPadding: parent.indicator.width + parent.spacing
                     }
@@ -240,7 +244,7 @@ Rectangle {
                     checked: true
                     contentItem: Text {
                         text: parent.text
-                        color: "white"
+                        color: theme.textOnDark
                         verticalAlignment: Text.AlignVCenter
                         leftPadding: parent.indicator.width + parent.spacing
                     }
@@ -251,7 +255,7 @@ Rectangle {
                     checked: true
                     contentItem: Text {
                         text: parent.text
-                        color: "white"
+                        color: theme.textOnDark
                         verticalAlignment: Text.AlignVCenter
                         leftPadding: parent.indicator.width + parent.spacing
                     }
